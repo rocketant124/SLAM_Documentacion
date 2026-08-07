@@ -1,0 +1,140 @@
+#Cuando decidas quitar los comentarios en el futuro, asegúrate de mantener los espacios de la estructura original 
+#(los dos espacios de separación para ros__parameters y los cuatro espacios para los parámetros internos).
+amcl:
+  ros__parameters:
+    use_sim_time: false
+    # Parámetros del modelo de ruido del odómetro (Alpha)
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    alpha5: 0.2
+    # Sistemas de Coordenadas (TF Frames)
+    base_frame_id: base_footprint
+    global_frame_id: map
+    odom_frame_id: odom
+    # Configuración del Sensor Láser
+    laser_model_type: likelihood_field
+    max_beams: 60
+    # Gestión de Partículas
+    max_particles: 2000
+    min_particles: 500
+    scan_topic: /scan_filtrado # Tópico del LiDAR con filtros aplicados
+    # Umbrales de actualización (Evitan consumo de CPU si el robot no se mueve)
+    # Son limites de movimiento: trabaja cuando el robot avance 20 cm o rote 11 grados:
+    update_min_a: 0.05         # Actualiza cada ~3° de giro
+    update_min_d: 0.05         # Actualiza cada 5 cm de avance
+    transform_tolerance: 1.0   # Sube la tolerancia de 0.5 a 1.0s para evitar desfasajes por CPU
+
+
+#Estos estan recorridos a la derecha
+map_server:
+  ros__parameters:
+    use_sim_time: false
+    yaml_filename: "/home/chris/mapa_pasillo.yaml"  # <-- Ruta del mapa en formato .yaml
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: false
+    global_frame: map
+    robot_base_frame: base_footprint
+    odom_topic: /odom
+    # Parametros para el punto obejtivo
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.15   # Tolerancia en metros (15 cm)
+      yaw_goal_tolerance: 0.20  # Tolerancia en radianes para el giro final (~11 grados)
+
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    controller_frequency: 5.0 # Optimizado: reducido de 20.0 a 5.0 Hz para liberar CPU
+    transform_tolerance: 1.0  # 1 Segundo de tolerancia
+    cmd_vel_topic: /commands/velocity 
+    FollowPath:
+      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+      desired_linear_vel: 0.15 # Velocidad lineal en m/s (15 m/s)
+      lookahead_dist: 0.4
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      max_angular_accel: 3.2
+      use_velocity_scaled_lookahead_dist: false
+
+lifecycle_manager_navigation:
+  ros__parameters:
+  # Orden de encendido y gestión de los estados de ciclo de vida de los nodos
+    node_names: ['map_server','amcl', 'planner_server', 'controller_server', 'behavior_server', 'bt_navigator', 'waypoint_follower']
+
+planner_server:
+  ros__parameters:
+    use_sim_time: false
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: nav2_navfn_planner/NavfnPlanner # Algoritmo de planificación global NavFn
+      tolerance: 0.5
+      use_astar: false # Al ser falso, calcula las rutas mediante Dijkstra
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: false
+      global_frame: odom
+      robot_base_frame: base_footprint
+      rolling_window: true # Ventana dinámica que sigue al robot
+      width: 3 #Se redujo de 4 a 3; Optimizado
+      height: 3
+      resolution: 0.05
+      robot_radius: 0.20 # Margen físico de colisión trasera/delantera
+      plugins: ["obstacle_layer", "inflation_layer"] 
+      obstacle_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        observation_sources: scan
+        scan:
+          topic: /scan_filtrado
+          max_obstacle_height: 0.8
+          min_obstacle_height: 0.1
+          clearing: true
+          marking: true
+      inflation_layer:
+        plugin: nav2_costmap_2d::InflationLayer
+        inflation_radius: 0.35 # Radio de seguridad alrededor de obstáculos
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: false
+      global_frame: map
+      robot_base_frame: base_footprint
+      resolution: 0.05
+      robot_radius: 0.18
+      # Optimización crítica: Se remueve 'obstacle_layer' para ahorrar recursos de cómputo masivos
+      plugins: ["static_layer", "inflation_layer"] #Quitamos "obstacle_layer" y en su lugar usamos "static_layer" para disminuir el consumo de CPU
+      static_layer:
+        plugin: nav2_costmap_2d::StaticLayer
+        map_subscribe_transient_local: true
+      #obstacle_layer:
+        #plugin: nav2_costmap_2d::ObstacleLayer
+        #observation_sources: scan
+        #scan:
+          #topic: /scan_filtrado
+          #max_obstacle_height: 0.8
+          #min_obstacle_height: 0.1
+          #clearing: true
+          #marking: true
+      inflation_layer:
+        plugin: nav2_costmap_2d::InflationLayer
+        inflation_radius: 0.35
+
+
+
+recoveries_server:
+  ros__parameters:
+    use_sim_time: false
+    robot_base_frame: base_footprint #Le dice explicitamente al sistema que use base_footprint como frame de referencia
+    recovery_plugins: ["spin", "back_up", "wait"]
+    spin:
+      plugin: nav2_recoveries/Spin
+    back_up:
+      plugin: nav2_recoveries/BackUp
+    wait:
+      plugin: nav2_recoveries/Wait

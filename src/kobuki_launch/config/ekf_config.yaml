@@ -1,0 +1,63 @@
+ekf_filter_node:
+  ros__parameters:
+    frequency: 30.0 #Reducir a 50 como en nav2_params; # Frecuencia de publicación de la odometría filtrada (Hz)
+    sensor_timeout: 0.1 # Tiempo de espera máximo (segundos) si un sensor se desconecta
+    odom0_mahalanobis_dist: 3.0
+    imu0_mahalanobis_dist: 3.0
+    two_d_mode: true  # Restringe el cálculo al plano 2D (ignora Z, pitch y roll)
+    publish_tf: true  # Publica activamente la transformación odom -> base_footprint
+
+    # RECUERDA: Desactiva el TF en el driver de Kobuki, ¡¡En caso de que ekf encime sus frames!!
+
+    # Configuración de los marcos de coordenadas de ROS
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+   
+
+    #--------------------------------------------------------------------
+    # Fuente 1: Odometría de ruedas
+    #--------------------------------------------------------------------
+    odom0: /odom
+    # Variables a fusionar: [X, Y, Z, Roll, Pitch, Yaw, dX, dY, dZ, dRoll, dPitch, dYaw, ddX, ddY, ddZ]
+    odom0_config: [true,  true,  false, # Toma la posición X e Y
+                   false, false, true,  # Toma la orientación Yaw (giro)
+                   true,  true,  false, #dX, dY (Velocidades lineales
+                   false, false, true,  # dYaw (Velocidad angular)
+                   false, false, false]
+    odom0_differential: false
+    odom0_relative: false
+
+    #--------------------------------------------------------------------
+    # Fuente 2: Unidad de Medición Inercial (IMU)
+    #--------------------------------------------------------------------
+    imu0: /sensors/imu_data
+    # Variables a fusionar: [X, Y, Z, Roll, Pitch, Yaw, dX, dY, dZ, dRoll, dPitch, dYaw, ddX, ddY, ddZ]
+    imu0_config: [false, false, false,
+                  false, false, false,  # Toma la orientación en 2D en YAW
+                  false, false, false, 
+                  false, false,  true,  # Toma las velocidades angulares (giróscopo)
+                  true,  false, false] # Toma la aceleración lineal en X (acelerómetro)
+    imu0_differential: false
+    imu0_relative: true # Se recomienda true para orientar la IMU respecto al inicio del robot
+    imu0_remove_gravitational_acceleration: true # Remueve el vector de gravedad de las lecturas
+
+    # --------------------------------------------------------------------------
+    # Matriz de Ruido del Proceso (Q) - Configura la confianza del modelo
+    # --------------------------------------------------------------------------
+    process_noise_covariance: [0.55, 1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.55, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.56, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.53, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.53, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.56, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.525, 0.0, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.525, 0.0, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.54, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.51, 0.0,  0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.51, 0.0,  0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.52, 0.0,  0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.51, 0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.51, 0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.515]
