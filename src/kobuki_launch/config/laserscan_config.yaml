@@ -1,0 +1,9 @@
+/depthimage_to_laserscan_node:
+  ros__parameters:
+    scan_time: 0.11  # Sincroniza el tiempo de escaneo (~11Hz) para estabilizarlo de 9-10Hz
+    range_min: 0.5 # El kinect v1 no lee bien a menos de 50 cm
+    range_max: 4.0 # Limita el rango para no procesar ruido lejano
+    scan_height: 3 # Reduce las filas procesadas de la imagen de pro
+    output_frame: "kinect_depth"
+    approximate_sync: true
+    queue_size: 2  # Reducir de 10 a 2 para descartar imágenes viejas y evitar acumulación en CPU
