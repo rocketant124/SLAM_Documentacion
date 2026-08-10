@@ -22,8 +22,8 @@ def generate_launch_description():
 
     declare_mapa = DeclareLaunchArgument(
         'mapa',
-        default_value=os.path.expanduser('~/mapa_pasillo.yaml'),
-        description='home/chris/mapa_pasillo.yaml'
+        default_value=os.path.expanduser('~/mapa.yaml'),
+        description='Ruta_del_archivo/mapa.yaml'
     )
 
     nav2_params = os.path.join(
