@@ -1,9 +1,10 @@
-from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from ament_index_python.packages import get_package_share_directory
-import os
+#Librerias a usar
+from launch import LaunchDescription # Launch Framework principal que agrupa todos los nodos y aciones que se ejecutarán y LaunchDescription es la acción para incluir y ejecutar un archivo de lanzamiento dentro de otro
+from launch_ros.actions import Node  # Importa la acción para lanzar nodos individuales de ROS 2
+from launch.actions import IncludeLaunchDescription 
+from launch.launch_description_sources import PythonLaunchDescriptionSource # Importa el cargador para interpretar archivos de lanzamiento basados en Python
+from ament_index_python.packages import get_package_share_directory # Importa la función para encontrar la ruta instalada de un paquete ROS 2
+import os # Importa la librería estándar de Python para interactuar con el sistema de archivos
 
 '''
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
