@@ -21,5 +21,4 @@ sleep 5
 # Terminal - El Cerebro Completo (Tu slam.launch.py)
 # --------------------------------------------------------------------
 # Esto ejecutará de forma ordenada: Kobuki, Kinect, Laserscan, EKF, SLAM y RViz2 sin duplicados.
-#gnome-terminal --tab --title="2. Lanzamiento Maestro ROS 2" -- bash -c "source ~/.bashrc && sudo nice -n -10 ros2 launch kobuki_launch slam.launch.py; exec bash" &
 gnome-terminal --tab --title="2. Lanzamiento Maestro ROS 2" -- bash -c "source ~/.bashrc && ros2 launch kobuki_launch slam.launch.py; exec bash" &
