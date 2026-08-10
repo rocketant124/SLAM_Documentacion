@@ -1,69 +1,13 @@
-'''from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
-from ament_index_python.packages import get_package_share_directory
-import os
+#Librerias a usar
+from launch import LaunchDescription # Launch Framework principal que agrupa todos los nodos y aciones que se ejecutarán y LaunchDescription es la acción para incluir y ejecutar un archivo de lanzamiento dentro de otro
+from launch_ros.actions import Node  # Importa la acción para lanzar nodos individuales de ROS 2
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument # Importa las acciones para incluir otros archivos launch y declarar argumentos
+from launch.launch_description_sources import PythonLaunchDescriptionSource # Importa el cargador para interpretar archivos de lanzamiento basados en Python
+from launch.substitutions import LaunchConfiguration # Importa la herramienta para recuperar los valores de los argumentos de lanzamiento
+from ament_index_python.packages import get_package_share_directory # Importa la función para encontrar la ruta instalada de un paquete ROS 2
+import os # Importa la librería estándar de Python para interactuar con el sistema de archivos
 
-def generate_launch_description():  
-    # 1. Definir el argumento para recibir el mapa desde la terminal (map:=/ruta/mapa.yaml)
-    map_yaml_file = LaunchConfiguration('map')
-
-    declare_mapa_yaml_cmd = DeclareLaunchArgument(
-        'map',
-        default_value=os.path.expanduser('~/mapa_laboratorio_two.yaml'),
-        description='home/chris/mapa_laboratorio_two.yaml' #ruta del archivo yaml del mapa
-    )
-    
-    # 2. Ruta de tus parámetros de Nav2 optimizados (donde está AMCL configurado)
-    nav2_params = os.path.join(
-        get_package_share_directory('kobuki_launch'),
-        'config', 'nav2_params.yaml'
-    )
-
-    # 3. Llamar al bringup de Nav2 (Esto activa AMCL, Map Server y todo el ciclo de vida)  
-    nav2_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('nav2_bringup'),
-                         'launch', 'bringup_launch.py')
-        ),
-        launch_arguments={
-            'map': map_yaml_file,
-            'use_sim_time': 'false',
-            'params_file': nav2_params,
-        }.items()
-    )
-
-    # 4. Configurar RViz2 apuntando a la carpeta de tu paquete
-    rviz_config = os.path.join(
-        get_package_share_directory('kobuki_launch'),
-        'rviz', 'nav2_visualizador.rviz'
-    )
-    # Nodo de RViz2 cargando automaticamente la plantilla de topicos
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config],
-        output='screen'
-    )
-    
-     # 5. Retornar la descripción del lanzamiento en el orden correcto
-    return LaunchDescription([
-        declare_mapa_yaml_cmd,
-        nav2_launch,
-        rviz,                      
-    ])'''
-
-from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
-from ament_index_python.packages import get_package_share_directory
-import os
-
+# Funcion en ROS 2 que retorna la descripción del sistema que se deseas ejecutar
 def generate_launch_description():
 
     # Kobuki + Kinect
