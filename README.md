@@ -56,11 +56,9 @@ El proyecto implementa un pipeline completo de navegación autónoma en interior
 ├── src/                            # Paquetes ROS 2 propios (código fuente)
 │   ├── kobuki_launch/
 │   └── kobuki_trajectories/
-└── config/                         # Archivos de configuración centralizados
-    ├── nav2_params.yaml
-    ├── mapper_params_online_async.yaml
-    ├── ekf_config.yaml
-    └── laserscan_config.yaml
+└── Scripts_mapeo_&_navegacion/     # Scripts de arranque del robot para mapeo y navegación autonoma
+    ├── arranque_mapeo.sh
+    ├── arranque_navegacion.sh
 ```
 
 > **Nota:** este repositorio solo incluye los paquetes desarrollados durante la estadía (`kobuki_launch`, `kobuki_trajectories`). Los paquetes de terceros (`kobuki_core`, `kobuki_ros`, `kinect_ros2`, `libfreenect`, `depthimage_to_laserscan`, `cmd_vel_mux`, `velocity_smoother`) **no se incluyen como código**; sus instrucciones de instalación están documentadas en [`docs/02-software-setup.md`](docs/02-software-setup.md).
