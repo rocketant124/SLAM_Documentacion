@@ -1,4 +1,3 @@
-
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
@@ -58,9 +57,13 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']
     )
 
+
+    # Obtener el directorio share de tu paquete
+    pkg_kobuki_launch = get_package_share_directory('kobuki_launch')
+
     # 4. Convertidor de Imagen de Profundidad a Láser 2D
     laserscan_config = os.path.join(
-    os.path.expanduser('~'), 'laserscan_config.yaml'
+    pkg_kobuki_launch, 'config', 'laserscan_config.yaml'
     )
 
     depthimage_to_laserscan = Node(

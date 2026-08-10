@@ -36,6 +36,12 @@ def generate_launch_description():
     remappings=[('odometry/filtered', '/odom_filtered')]
     )
 
+    # Obtener la ruta del directorio share de tu paquete
+    pkg_kobuki_launch = get_package_share_directory('kobuki_launch')
+
+    # Construir la ruta relativa al archivo YAML en la carpeta config
+    mapper_params_file = os.path.join(pkg_kobuki_launch, 'config', 'mapper_params_online_async.yaml')
+
     # SLAM Toolbox
     slam = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -44,7 +50,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'use_sim_time': 'false',
-            'slam_params_file': '/home/chris/mapper_params_online_async.yaml' # Archivo personalizado
+            'slam_params_file': mapper_params_file # Archivo personalizado, usamos la variable que guarda la ruta del .yaml
         }.items()
     )
 
