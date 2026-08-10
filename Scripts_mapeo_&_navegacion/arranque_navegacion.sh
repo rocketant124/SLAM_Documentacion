@@ -18,9 +18,6 @@ sleep 2
 gnome-terminal --tab --title="1. Filtro" -- bash -c "source ~/.bashrc && ros2 run kobuki_trajectories filtro_laserscan; exec bash" &
 sleep 5
 
-#Terminal 2 - Puente directo de cmd_vel a la Kobuki
-#gnome-terminal --tab --title="Puente Velocidades" -- bash -c "source ~/.bashrc && ros2 run topic_tools relay /cmd_vel /commands/velocity; exec bash" &
-#sleep 5
 # --------------------------------------------------------------------
 # Terminal - El Cerebro Completo (Tu slam.launch.py)
 # --------------------------------------------------------------------
