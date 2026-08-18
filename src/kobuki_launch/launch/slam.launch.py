@@ -5,6 +5,7 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource # Importa el cargador para interpretar archivos de lanzamiento basados en Python
 from ament_index_python.packages import get_package_share_directory # Importa la función para encontrar la ruta instalada de un paquete ROS 2
 import os # Importa la librería estándar de Python para interactuar con el sistema de archivos
+from launch.actions import IncludeLaunchDescription, TimerAction # Se agrega TimerAction para meter retrasos de arranque
 
 '''
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +24,7 @@ def generate_launch_description():
                          'launch', 'kobuki_kinect.launch.py')
         )
     )
-
+    
     ekf_config = os.path.join(
     get_package_share_directory('kobuki_launch'),
     'config', 'ekf_config.yaml'
@@ -37,6 +38,16 @@ def generate_launch_description():
     remappings=[('odometry/filtered', '/odom_filtered')]
     )
 
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
+    
+    # Retrasar EKF por 1.5 segundos (para dar tiempo a que los sensores publiquen)
+    ekf_delayed = TimerAction(
+        period=1.5,
+        actions=[ekf_node]
+    )
+    '''
+
     # Obtener la ruta del directorio share de tu paquete
     pkg_kobuki_launch = get_package_share_directory('kobuki_launch')
 
@@ -44,7 +55,7 @@ def generate_launch_description():
     mapper_params_file = os.path.join(pkg_kobuki_launch, 'config', 'mapper_params_online_async.yaml')
 
     # SLAM Toolbox
-    slam = IncludeLaunchDescription(
+    slam_toolbox_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('slam_toolbox'),
                          'launch', 'online_async_launch.py')
@@ -55,24 +66,53 @@ def generate_launch_description():
         }.items()
     )
 
-    # RViz2 para visualizar el mapa
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
 
+    # 2. Retrasar SLAM Toolbox por 3.0 segundos
+    slam_delayed = TimerAction(
+        period=3.0,
+        actions=[slam_toolbox_launch]
+    )
+    '''
+    
+    # RViz2 para visualizar el mapa
     # Ruta a configuracion de rviz
     rviz_config = os.path.join(
         get_package_share_directory('kobuki_launch'),
         'rviz', 'mapeo.rviz'
     )
 
-    rviz = Node(
+    rviz_node = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         arguments=['-d', rviz_config],
     )
 
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
+
+    # 3. Retrasar RViz2 por 5.0 segundos (para que SLAM ya esté listo)
+    rviz_delayed = TimerAction(
+        period=5.0,
+        actions=[rviz_node]
+    )
+    '''
     return LaunchDescription([
         kobuki_kinect,
         ekf_node,
-        slam,
-        rviz,
+        slam_toolbox_launch,
+        rviz_node,
     ])
+
+'''
+#Si deseas utilizar los retrasos en caso de intestabilidad, el return LaunchDescription, quedaria:
+
+    return LaunchDescription([
+        kobuki_kinect,
+        ekf_delayed,
+        slam_delayed,
+        rviz_delayed,
+    ])
+'''

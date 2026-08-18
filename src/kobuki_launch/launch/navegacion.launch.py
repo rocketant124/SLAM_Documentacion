@@ -7,7 +7,6 @@ from launch.substitutions import LaunchConfiguration # Importa la herramienta pa
 from ament_index_python.packages import get_package_share_directory # Importa la función para encontrar la ruta instalada de un paquete ROS 2
 import os # Importa la librería estándar de Python para interactuar con el sistema de archivos
 
-# Funcion en ROS 2 que retorna la descripción del sistema que se deseas ejecutar
 def generate_launch_description():
 
     # Kobuki + Kinect
@@ -22,8 +21,8 @@ def generate_launch_description():
 
     declare_mapa = DeclareLaunchArgument(
         'mapa',
-        default_value=os.path.expanduser('~/mapa.yaml'),
-        description='Ruta_del_archivo/mapa.yaml'
+        default_value=os.path.expanduser('~/mapa_laboratorio_two.yaml'),
+        description='home/chris/mapa_laboratorio_two.yaml'
     )
 
     nav2_params = os.path.join(
@@ -45,6 +44,16 @@ def generate_launch_description():
         }.items()
     )
 
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
+    
+    # Retrasar Nav2 por 4.0 segundos
+    nav2_delayed = TimerAction(
+        period=4.0,
+        actions=[nav2_launch]
+    )
+    '''
+
     # Filtro de Kalman (EKF)
     ekf_config = os.path.join(
         get_package_share_directory('kobuki_launch'),
@@ -61,6 +70,16 @@ def generate_launch_description():
         ],
         remappings=[('odometry/filtered', '/odom_filtered')]
     )
+
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
+
+    # Retrasar EKF por 1.5 segundos (para dar tiempo a que los sensores publiquen)
+    ekf_delayed = TimerAction(
+        period=1.5,
+        actions=[ekf_node]
+    )
+    '''
 
     # Puente de Velocidades Nativo (Reemplaza al .sh)
     relay_cmd_vel = Node(
@@ -79,6 +98,16 @@ def generate_launch_description():
         arguments=['-d', os.path.join(get_package_share_directory('nav2_bringup'), 'rviz', 'nav2_default_view.rviz')]
     )
 
+    '''
+    #Usar este código, en caso de que se presenten, inestabilidades en el funcionamiento del robot
+
+    # Retrasar RViz2 por 7.0 segundos
+    rviz_delayed = TimerAction(
+        period=7.0,
+        actions=[rviz_node]
+    )
+    '''
+
     return LaunchDescription([
         kobuki_kinect,
         declare_mapa,
@@ -88,5 +117,16 @@ def generate_launch_description():
         rviz,
     ])
 
+'''
+#Si deseas utilizar los retrasos en caso de intestabilidad, el return LaunchDescription, quedaria:
 
+    return LaunchDescription([
+        kobuki_kinect,
+        declare_mapa,
+        relay_cmd_vel,
+        ekf_delayed,   # t = 1.5s
+        nav2_delayed,  # t = 4.0s
+        rviz_delayed,  # t = 7.0s
+    ])
+'''
 
